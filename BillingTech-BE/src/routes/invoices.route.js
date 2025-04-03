@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 const express = require("express");
 const db = require("../db");
 
@@ -7,7 +7,9 @@ const router = express.Router();
 const fetchInvoices = async (req, res) => {
   console.log("Fetching invoices...");
   try {
-    const [rows] = await db.query("SELECT * FROM invoices");
+    const [rows] = await db.query(
+      "SELECT id, customer, amount, date FROM invoices"
+    );
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error fetching invoices:", error);
