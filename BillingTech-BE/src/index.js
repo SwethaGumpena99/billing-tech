@@ -1,11 +1,14 @@
-const express = require('express')
-const { router } = require('./routes')
+"use strict";
+const express = require("express");
+const { router } = require("./routes");
+const cors = require("cors");
 
-const app = express()
+const app = express();
 
-app.use(express.json())
-app.use('', router)
+app.use(express.json());
+app.use("", router);
+app.use(cors(router));
 
 app.listen(8080, () => {
-    console.log("Server listening at http://localhost:8080")
-})
+  console.log("Server listening at http://localhost:8080");
+});
