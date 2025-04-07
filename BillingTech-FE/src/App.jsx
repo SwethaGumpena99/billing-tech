@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import "./App.css";
-import axios from 'axios'
+import axios from "axios";
+import InvoiceTable from "./invoice";
 
 function App() {
-  const [apiResponse, setApiResponse] = useState(""); 
-  
+  const [apiResponse, setApiResponse] = useState("");
+
   const handleButtonClick = async () => {
     try {
       const response = await axios.get("http://localhost:8080/ping"); // Make the GET request
@@ -21,6 +22,7 @@ function App() {
         <p>{`Hello 👋  ${apiResponse}`}</p>
         <button onClick={handleButtonClick}>Ping API</button>
       </div>
+      <InvoiceTable />
     </>
   );
 }
