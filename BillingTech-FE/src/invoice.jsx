@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchInvoices } from "./api";
+import { fetchInvoices, fetchInvoiceDetails } from "./api";
 
 const InvoiceTable = () => {
   const [invoices, setInvoices] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoiceDetails, setInvoiceDetails] = useState(null);
 
   useEffect(() => {
     const getInvoices = async () => {
@@ -19,6 +21,15 @@ const InvoiceTable = () => {
 
     getInvoices();
   }, []);
+
+  const handleInvoiceClick = async (invoiceId) => {
+    try {
+      const details = await fetchInvoiceDetails(invoiceId);
+      setInvoiceDetails(details);
+    } catch (error) {
+      console.error("Error fetching invoice details:", error);
+    }
+  };
 
   if (error) {
     return <p>{error}</p>;
@@ -40,7 +51,10 @@ const InvoiceTable = () => {
           </thead>
           <tbody>
             {invoices.map((invoice) => (
-              <tr key={invoice.invoice_id}>
+              <tr
+                key={invoice.invoice_id}
+                onClick={() => handleInvoiceClick(invoice.invoice_id)}
+              >
                 <td>{invoice.invoice_id}</td>
                 <td>{invoice.user_id}</td>
                 <td>{invoice.total_amount}</td>
@@ -50,6 +64,25 @@ const InvoiceTable = () => {
             ))}
           </tbody>
         </table>
+
+        {invoiceDetails && (
+          <div className="invoice-details">
+            <h3>Invoice Details</h3>
+            <p>Invoice ID: {invoiceDetails[0].invoice_id}</p>
+            <p>User ID: {invoiceDetails[0].user_id}</p>
+            <p>Total Amount: {invoiceDetails[0].total_amount}</p>
+            <p>Status: {invoiceDetails[0].status}</p>
+            <h4>Line Items</h4>
+            <ul>
+              {invoiceDetails.map((item) => (
+                <li key={item.line_item_id}>
+                  {item.description} - {item.quantity} x {item.unit_price} ={" "}
+                  {item.total_price}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     );
   }
