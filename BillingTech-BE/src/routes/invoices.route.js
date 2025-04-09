@@ -41,11 +41,38 @@ const fetchInvoiceDetails = async (req, res) => {
   }
 };
 
+const requestRefund = async (req, res) => {
+  console.log("Requesting full refund...");
+  const { invoice_id, user_id, request_description } = req.body;
+
+  if (!invoice_id || !user_id || !request_description) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO refund_requests (invoice_id, user_id, request_description, status)
+       VALUES (?, ?, ?, 'Pending')`,
+      [invoice_id, user_id, request_description]
+    );
+
+    res.status(201).json({
+      message: "Refund request submitted",
+      refund_request_id: result.insertId
+    });
+  } catch (error) {
+    console.error("Error creating refund request:", error);
+    res.status(500).json({ error: "Failed to submit refund request" });
+  }
+};
+
 // Endpoint to get all invoices
 router.get("/", fetchInvoices);
 
 // Add the new endpoint
 router.get("/:invoice_id", fetchInvoiceDetails);
+
+router.post("/request-refund", requestRefund);
 
 module.exports = {
   router,

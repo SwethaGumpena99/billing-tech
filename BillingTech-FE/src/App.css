@@ -124,3 +124,21 @@
 .line-items-table tr:hover {
   background-color: #f1f1f1;
 }
+
+.request-full-refund-button {
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.submit-refund-request-button {
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+}
