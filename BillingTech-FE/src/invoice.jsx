@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { fetchInvoices, fetchInvoiceDetails } from "./api";
+import { fetchInvoices, fetchInvoiceDetails, requestRefund } from "./api";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const InvoiceTable = () => {
   const [invoices, setInvoices] = useState([]);
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [invoiceDetails, setInvoiceDetails] = useState(null);
+  const [refundDescription, setRefundDescription] = useState("");
+  const [isRequestFullRefund, setIsRequestFullRefund] = useState(false);
 
   useEffect(() => {
     const getInvoices = async () => {
@@ -32,9 +36,31 @@ const InvoiceTable = () => {
     }
   };
 
+  const submitRefundRequest = async () => {
+    if (!refundDescription.trim()) {
+      toast.error("Please enter a refund description.");
+      return;
+    }
+
+    try {
+      await requestRefund(
+        invoiceDetails[0].invoice_id,
+        invoiceDetails[0].user_id,
+        refundDescription
+      );
+      toast.success("Refund request submitted successfully!");
+      setRefundDescription("");
+      setIsRequestFullRefund(false);
+    } catch (err) {
+      console.error("Refund request failed:", err);
+      toast.error(err.message || "Failed to submit refund request.");
+    }
+  };
+
   const closeModal = () => {
     setSelectedInvoice(null);
     setInvoiceDetails(null);
+    setIsRequestFullRefund(false);
   };
 
   const handleOutsideClick = (event) => {
@@ -64,6 +90,7 @@ const InvoiceTable = () => {
             <tr
               key={invoice.invoice_id}
               onClick={() => handleInvoiceClick(invoice.invoice_id)}
+              style={{ cursor: "pointer" }}
             >
               <td>{invoice.invoice_id}</td>
               <td>{invoice.user_id}</td>
@@ -103,7 +130,44 @@ const InvoiceTable = () => {
                       </tr>
                     </tbody>
                   </table>
+                  {/* Request Refund Button */}
+                  {!isRequestFullRefund && (
+                    <button
+                      onClick={() => setIsRequestFullRefund(true)} // show textarea
+                      className="request-full-refund-button"
+                    >
+                      Full Refund
+                    </button>
+                  )}
                 </div>
+
+                {/* Refund Form */}
+                {isRequestFullRefund && (
+                  <div
+                    className="refund-request-form"
+                    style={{ marginTop: "1rem" }}
+                  >
+                    <textarea
+                      placeholder="Enter reason for refund..."
+                      value={refundDescription}
+                      onChange={(e) => setRefundDescription(e.target.value)}
+                      rows={3}
+                      style={{
+                        width: "96%",
+                        marginBottom: "0.5rem",
+                        padding: "0.5rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                      }}
+                    />
+                    <button
+                      onClick={submitRefundRequest}
+                      className="submit-refund-request-button"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                )}
                 <div className="line-items-section">
                   <h4>Line Items</h4>
                   <table className="line-items-table">
@@ -132,6 +196,7 @@ const InvoiceTable = () => {
           </div>
         </div>
       )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
