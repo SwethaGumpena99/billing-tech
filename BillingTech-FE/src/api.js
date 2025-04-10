@@ -39,3 +39,22 @@ export const requestRefund = async (invoiceId, userId, description) => {
     );
   }
 };
+
+export const submitLineItemChangeRequest = async (lineItemId, userId, description) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/invoices/request-lineitemchange",
+      {
+        line_item_id: lineItemId,
+        user_id: userId,
+        request_description: description,
+        status: "Pending"
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.error || "Failed to submit line item change request"
+    );
+  }
+};
