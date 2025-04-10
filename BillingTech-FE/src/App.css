@@ -50,7 +50,7 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   position: relative;
 }
@@ -125,7 +125,7 @@
   background-color: #f1f1f1;
 }
 
-.request-full-refund-button {
+.request-full-refund-button, .request-change-button {
   background-color: #f44336;
   color: #fff;
   border: none;
@@ -134,11 +134,15 @@
   border-radius: 5px;
 }
 
-.submit-refund-request-button {
+.submit-refund-request-button,.submit-line-item-request-button {
   background-color: #4CAF50;
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.actions-column {
+  min-width: 150px;
 }

@@ -66,6 +66,31 @@ const requestRefund = async (req, res) => {
   }
 };
 
+const submitLineItemChangeRequest = async (req, res) => {
+  console.log("Requesting line item change rquest...");
+  const { line_item_id, user_id, request_description, status } = req.body;
+
+  if (!line_item_id || !user_id || !request_description || !status) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO change_requests (line_item_id, user_id, request_description, status)
+       VALUES (?, ?, ?, ?)`,
+      [line_item_id, user_id, request_description, status]
+    );
+
+    res.status(201).json({
+      message: "Change Request submitted",
+      refund_request_id: result.insertId
+    });
+  } catch (error) {
+    console.error("Error creating change request:", error);
+    res.status(500).json({ error: "Failed to submit change request" });
+  }
+};
+
 // Endpoint to get all invoices
 router.get("/", fetchInvoices);
 
@@ -73,6 +98,8 @@ router.get("/", fetchInvoices);
 router.get("/:invoice_id", fetchInvoiceDetails);
 
 router.post("/request-refund", requestRefund);
+
+router.post("/request-lineitemchange", submitLineItemChangeRequest);
 
 module.exports = {
   router,

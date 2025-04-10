@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchInvoices, fetchInvoiceDetails, requestRefund } from "./api";
+import { fetchInvoices, fetchInvoiceDetails, requestRefund, submitLineItemChangeRequest } from "./api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,6 +10,8 @@ const InvoiceTable = () => {
   const [invoiceDetails, setInvoiceDetails] = useState(null);
   const [refundDescription, setRefundDescription] = useState("");
   const [isRequestFullRefund, setIsRequestFullRefund] = useState(false);
+  const [selectedLineItem, setSelectedLineItem] = useState(null);
+  const [lineItemChangeDescription, setLineItemChangeDescription] = useState("");
 
   useEffect(() => {
     const getInvoices = async () => {
@@ -57,10 +59,33 @@ const InvoiceTable = () => {
     }
   };
 
+  const submitLineItemChange = async () => {
+    if (!lineItemChangeDescription.trim()) {
+      toast.error("Please enter a description for the change request.");
+      return;
+    }
+
+    try {
+      await submitLineItemChangeRequest(
+        selectedInvoice,
+        selectedLineItem.line_item_id,
+        lineItemChangeDescription
+      );
+      toast.success("Line item change request submitted successfully!");
+      setSelectedLineItem(null);
+      setLineItemChangeDescription("");
+    } catch (err) {
+      console.error("Line item change request failed:", err);
+      toast.error(err.message || "Failed to submit line item change request.");
+    }
+  };
+
   const closeModal = () => {
     setSelectedInvoice(null);
     setInvoiceDetails(null);
     setIsRequestFullRefund(false);
+    setSelectedLineItem(null);
+    setLineItemChangeDescription("");
   };
 
   const handleOutsideClick = (event) => {
@@ -136,7 +161,7 @@ const InvoiceTable = () => {
                       onClick={() => setIsRequestFullRefund(true)} // show textarea
                       className="request-full-refund-button"
                     >
-                      Full Refund
+                      Request Full Refund
                     </button>
                   )}
                 </div>
@@ -164,7 +189,7 @@ const InvoiceTable = () => {
                       onClick={submitRefundRequest}
                       className="submit-refund-request-button"
                     >
-                      Submit
+                      Submit Full Refund
                     </button>
                   </div>
                 )}
@@ -177,6 +202,7 @@ const InvoiceTable = () => {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Total Price</th>
+                        <th className="actions-column">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -186,11 +212,46 @@ const InvoiceTable = () => {
                           <td>{item.quantity}</td>
                           <td>{item.unit_price}</td>
                           <td>{item.total_price}</td>
+                          <td>
+                            <button
+                              onClick={() => setSelectedLineItem(item)}
+                              className="request-change-button"
+                            >
+                              Request Change
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+
+                {selectedLineItem && (
+                  <div className="line-item-change-form" style={{ marginTop: "1rem" }}>
+                    <h4>Request Change for Line Item: {selectedLineItem.description}</h4>
+                    <textarea
+                      placeholder="Enter change request description..."
+                      value={lineItemChangeDescription}
+                      onChange={(e) => setLineItemChangeDescription(e.target.value)}
+                      rows={3}
+                      style={{
+                        width: "96%",
+                        marginBottom: "0.5rem",
+                        padding: "0.5rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                      }}
+                    />
+                    <button
+                      onClick={submitLineItemChange}
+                      className="submit-line-item-request-button"
+                    >
+                      Submit Change Request
+                    </button>
+                  </div>
+                )}
+
+
               </div>
             )}
           </div>
